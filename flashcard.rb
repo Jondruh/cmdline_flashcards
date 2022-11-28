@@ -1,4 +1,5 @@
 require 'date'
+require 'tempfile'
 
 # Filenames for the cards must be formatted as such:
 # year-month-day_currentbox_cardtopic.md
@@ -49,6 +50,8 @@ def next_study_date(input, card) #rewrites the card file name to indicate the bo
   File.rename(card, new_name)
 end
 
+# Formats some markdown for printing to console
+# Currently only handles code blocks
 def format_code_blocks(string)
   triple_pairs  = string.scan(/```/).count / 2
   triple_pairs.times do
@@ -79,16 +82,44 @@ def due_cards #returns an array of all due cards
   end
 end
 
+def create_card
+  #I think i should be using just File.new, not a Tempfile, because I want the card to stay around
+  puts "What is your card name? (snake_case_only)"
+  card_name = gets.chomp
+
+  #create a file with that name
+  card = File.new("./cards/#{Date.today}_1_#{card_name}.md", "w")
+  path = card.path
+
+  card.puts "<card_bottom_flag>"
+
+  card.close
+
+  system "$EDITOR #{path}"
+
+  
+
+  #When the editor is closed fall back to this method?
+end
+
 cards = due_cards
 
 puts "Welcome to the flashcard program"
-puts "What would you like to do?"
-#puts "1) Create a card"
-puts "2) Review your cards (#{cards.size} cards to review)"
-input = gets.chomp
 
-case input
-when '2' then study_cards(cards)
+loop do
+  puts "What would you like to do?"
+  puts "1) Create a card"
+  puts "2) Review your cards (#{cards.size} cards to review)"
+  puts "3) Exit the program"
+
+  input = gets.chomp
+
+  case input
+  when '1' then create_card
+  when '2' then study_cards(cards)
+  when '3' then break
+  end
+
 end
 
 
