@@ -43,7 +43,7 @@ def next_study_date(input, card) #rewrites the card file name to indicate the bo
   when 'n' then box += 1
   end
 
-  date = Date.parse(date) + LEITNER_SCHEDULE[box]
+  date = Date.today + LEITNER_SCHEDULE[box]
 
   new_name = "./cards/" + [date, box, name].join("_")
 
