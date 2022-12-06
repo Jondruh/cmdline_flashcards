@@ -1,10 +1,12 @@
 require 'date'
-require 'tempfile'
-
+require 'pry'
 # Filenames for the cards must be formatted as such:
 # year-month-day_currentbox_cardtopic.md
 #       ^
 # date to review
+#
+# I've symlinked my cards folder to where my flashcard.rb file is so that
+# I can easily backup my cards folder without nesting repositories.
 
 LEITNER_SCHEDULE = {1 => 1, 2 => 2, 3 => 4, 4 => 8, 5 => 16, 6 => 32, 7 => 64}
 
@@ -25,10 +27,17 @@ def study_cards(cards) #Iterates through each card of the array handed to it
     puts format_code_blocks(back)
     puts "_" * 80
 
+    puts "To edit this card press ('E')".center(80)
     puts "Previous box ('P') // Next box ('N') // This box ('T')".center(80)
 
     input = gets.chomp
-    next_study_date(input, card)
+
+    case input.downcase
+    when 'e' then 
+      system "$EDITOR #{card}"
+    else
+      next_study_date(input, card)
+    end
 
   end
 end
@@ -83,9 +92,14 @@ def due_cards #returns an array of all due cards
 end
 
 def create_card
-  #I think i should be using just File.new, not a Tempfile, because I want the card to stay around
-  puts "What is your card name? (snake_case_only)"
-  card_name = gets.chomp
+  puts "What is your card name? (CamelCaseOnlyPlease)"
+  card_name = nil
+
+  loop do 
+    card_name = gets.chomp
+    break if card_name.chars.none?(/[^a-zA-Z0-9]/)
+    puts "Sorry, only letters and numbers allowed in the card name."
+  end
 
   #create a file with that name
   card = File.new("./cards/#{Date.today}_1_#{card_name}.md", "w")
@@ -95,18 +109,15 @@ def create_card
 
   card.close
 
+  #Uses default editor for the terminal. $EDITOR variable is a bash thing?
   system "$EDITOR #{path}"
-
-  
-
-  #When the editor is closed fall back to this method?
 end
-
-cards = due_cards
 
 puts "Welcome to the flashcard program"
 
 loop do
+  cards = due_cards
+
   puts "What would you like to do?"
   puts "1) Create a card"
   puts "2) Review your cards (#{cards.size} cards to review)"
