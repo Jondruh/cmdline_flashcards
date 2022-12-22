@@ -95,10 +95,17 @@ def create_card
   puts "What is your card name? (CamelCaseOnlyPlease)"
   card_name = nil
 
-  loop do 
+  card_names = Dir["./cards/*md"].map { |card| card.split('_')[2] }
+
+  loop do
     card_name = gets.chomp
-    break if card_name.chars.none?(/[^a-zA-Z0-9]/)
-    puts "Sorry, only letters and numbers allowed in the card name."
+    if card_name.chars.any?(/[^a-zA-Z0-9]/)
+      puts "Sorry, only letters and numbers allowed in the card name."
+    elsif card_names.include?(card_name + ".md")
+      puts "There is already a card with that name, please pick a different name"
+    else
+      break
+    end
   end
 
   #create a file with that name
@@ -109,7 +116,7 @@ def create_card
 
   card.close
 
-  #Uses default editor for the terminal. $EDITOR variable is a bash thing?
+  #Uses default editor for the terminal. $EDITOR variable is a bash thing
   system "$EDITOR #{path}"
 end
 
