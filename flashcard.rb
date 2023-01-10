@@ -1,12 +1,8 @@
 require 'date'
-require 'pry'
 # Filenames for the cards must be formatted as such:
 # year-month-day_currentbox_cardtopic.md
 #       ^
 # date to review
-#
-# I've symlinked my cards folder to where my flashcard.rb file is so that
-# I can easily backup my cards folder without nesting repositories.
 
 LEITNER_SCHEDULE = {1 => 1, 2 => 2, 3 => 4, 4 => 8, 5 => 16, 6 => 32, 7 => 64}
 
@@ -116,7 +112,7 @@ def create_card
 
   card.close
 
-  #Uses default editor for the terminal. $EDITOR variable is a bash thing
+  #Uses default linux editor
   system "$EDITOR #{path}"
 end
 
