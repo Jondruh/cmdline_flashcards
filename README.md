@@ -15,5 +15,5 @@ the directory in which you run 'flashcards.rb'. I've symlinked my cards folder
 to where my flashcard.rb file is so that I can easily backup my cards folder.
 
 The program only supports terminals that use the '$EDITOR' environment variable
-as this what it uses to open an editor for card creation and editing.
+as this is what is used to open an editor for card creation and editing.
 
