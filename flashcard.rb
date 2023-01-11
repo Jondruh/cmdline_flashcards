@@ -1,3 +1,4 @@
+require 'pry'
 require 'date'
 # Filenames for the cards must be formatted as such:
 # year-month-day_currentbox_cardtopic.md
@@ -87,6 +88,33 @@ def due_cards #returns an array of all due cards
   end
 end
 
+def create_card_name(name_list)
+  input = ""
+  puts "All card names:"
+  puts name_list.sort
+
+  loop do
+    system "stty raw -echo" #Raw mode, no echo
+    char = STDIN.getc
+    system "stty -raw echo" #reset terminal mode
+
+    break if char == "\r"
+
+    if char == "\u007F"
+      input.slice!(-1) # "\u007F" is backspace
+    else
+      input = input + char
+    end
+
+    system "clear"
+    print input
+    puts
+    puts name_list.select { |name| name.start_with?(input) }.sort
+    # name_list.include?(input) ? puts("\nName already exists") : puts("\nValid name")
+  end
+  input
+end
+
 def create_card
   puts "What is your card name? (CamelCaseOnlyPlease)"
   card_name = nil
@@ -94,7 +122,7 @@ def create_card
   card_names = Dir["./cards/*md"].map { |card| card.split('_')[2] }
 
   loop do
-    card_name = gets.chomp
+    card_name = create_card_name(card_names)
     if card_name.chars.any?(/[^a-zA-Z0-9]/)
       puts "Sorry, only letters and numbers allowed in the card name."
     elsif card_names.include?(card_name + ".md")
