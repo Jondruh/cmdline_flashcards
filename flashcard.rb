@@ -98,9 +98,12 @@ def create_card_name(name_list)
     char = STDIN.getc
     system "stty -raw echo" #reset terminal mode
 
-    break if char == "\r"
-
-    if char == "\u007F"
+    if char == "\e"
+      input = char
+      break
+    elsif char == "\r"
+      break
+    elsif char == "\u007F"
       input.slice!(-1) # "\u007F" is backspace
     else
       input = input + char
@@ -123,7 +126,9 @@ def create_card
 
   loop do
     card_name = create_card_name(card_names)
-    if card_name.chars.any?(/[^a-zA-Z0-9]/)
+    if card_name == "\e"
+      break
+    elsif card_name.chars.any?(/[^a-zA-Z0-9]/)
       puts "Sorry, only letters and numbers allowed in the card name."
     elsif card_names.include?(card_name + ".md")
       puts "There is already a card with that name, please pick a different name"
@@ -131,6 +136,8 @@ def create_card
       break
     end
   end
+
+  return nil if card_name == "\e"
 
   #create a file with that name
   card = File.new("./cards/#{Date.today}_1_#{card_name}.md", "w")
