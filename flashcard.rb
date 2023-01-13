@@ -1,4 +1,3 @@
-require 'pry'
 require 'date'
 # Filenames for the cards must be formatted as such:
 # year-month-day_currentbox_cardtopic.md
@@ -114,17 +113,14 @@ def display_completion_list(candidate_list, selection = nil)
 end
 
 def auto_complete(candidate_list, char)
-  selection = -1
-
   while char == TAB
-    # selection = 0 unless (0...candidate_list.length).include(selection)
-    selection += 1
-    selection = 0 if selection >= candidate_list.length
+    selection = 0 unless (0...candidate_list.length).include?(selection)
     input = candidate_list[selection]
     card_name_prompt
     print input
     display_completion_list(candidate_list, selection)
     char = fetch_char
+    selection += 1
   end
 
   [input, char]
