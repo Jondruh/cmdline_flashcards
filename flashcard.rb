@@ -11,6 +11,7 @@ RETURN = "\r".freeze
 BACKSPACE = "\u007F".freeze
 
 LEITNER_SCHEDULE = { 1 => 1, 2 => 2, 3 => 4, 4 => 8, 5 => 16, 6 => 32, 7 => 64 }.freeze
+LEITNER_RANGE = (1..7).freeze
 
 class CardDeck
   def initialize(directory)
@@ -91,13 +92,14 @@ def next_study_date(input, card)
   _date, box, name = card.split('_')
 
   box = box.to_i
-  binding.pry
+  box_change = nil
   case input.downcase
-  when 'p' then box -= 1
-  when 'n' then box += 1
+  when 'p' then box_change = box - 1
+  when 'n' then box_change = box + 1
   end
 
-  binding.pry
+  box = box_change if LEITNER_RANGE.include?(box_change)
+
   date = Date.today + LEITNER_SCHEDULE[box]
 
   new_name = './cards/' + [date, box, name].join('_')
