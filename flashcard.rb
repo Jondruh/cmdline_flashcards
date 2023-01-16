@@ -1,4 +1,5 @@
 require 'date'
+require 'pry'
 # Filenames for the cards must be formatted as such:
 # year-month-day_currentbox_cardtopic.md
 #       ^
@@ -10,6 +11,23 @@ RETURN = "\r".freeze
 BACKSPACE = "\u007F".freeze
 
 LEITNER_SCHEDULE = { 1 => 1, 2 => 2, 3 => 4, 4 => 8, 5 => 16, 6 => 32, 7 => 64 }.freeze
+
+class CardDeck
+  def initialize(directory)
+    @cards = Dir[directory + '*md']
+  end
+
+  def cards
+    Marshal.load(Marshal.dump(@cards))
+  end
+
+  def due
+    cards.select do |file_name|
+      date = file_name.split('_')[0]
+      Date.parse(date) <= Date.today
+    end
+  end
+end
 
 def highlight_text(text)
   "\e[40m" + text + "\e[0m"
@@ -37,8 +55,8 @@ def format_code_blocks(string)
 end
 
 # Iterates through each card of the array handed to it
-def study_cards(cards)
-  cards.shuffle.each do |card|
+def study_cards(deck)
+  deck.shuffle.each do |card|
     front, back = fetch_card(card)
 
     system 'clear'
@@ -73,11 +91,13 @@ def next_study_date(input, card)
   _date, box, name = card.split('_')
 
   box = box.to_i
+  binding.pry
   case input.downcase
   when 'p' then box -= 1
   when 'n' then box += 1
   end
 
+  binding.pry
   date = Date.today + LEITNER_SCHEDULE[box]
 
   new_name = './cards/' + [date, box, name].join('_')
@@ -92,14 +112,6 @@ def fetch_card(card)
   end
 end
 
-# returns an array of all due cards
-def due_cards
-  all_cards = Dir['./cards/*md']
-  all_cards.select do |file_name|
-    date = file_name.split('_')[0]
-    Date.parse(date) <= Date.today
-  end
-end
 
 def display_completion_list(candidate_list, selection = nil)
   puts
@@ -172,10 +184,10 @@ def create_card_name(name_list)
   input
 end
 
-def create_card
+def create_card(deck)
   card_name = nil
 
-  card_names = Dir['./cards/*md'].map { |card| card.split('_')[2].delete_suffix('.md') }
+  card_names = deck.cards.map { |card| card.split('_')[2].delete_suffix('.md') }
 
   loop do
     card_name = create_card_name(card_names)
@@ -209,18 +221,19 @@ end
 puts 'Welcome to the flashcard program'
 
 loop do
-  cards = due_cards
+  deck = CardDeck.new("./cards/")
+  # cards = due_cards
 
   puts 'What would you like to do?'
   puts '1) Create a card'
-  puts "2) Review your cards (#{cards.size} cards to review)"
+  puts "2) Review your cards (#{deck.due.size} cards to review)"
   puts '3) Exit the program'
 
   input = gets.chomp
 
   case input
-  when '1' then create_card
-  when '2' then study_cards(cards)
+  when '1' then create_card(deck)
+  when '2' then study_cards(deck.due)
   when '3' then break
   end
 end
