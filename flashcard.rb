@@ -22,12 +22,17 @@ class CardDeck
     Marshal.load(Marshal.dump(@cards))
   end
 
+  def card_names
+    cards.map { |card| card.split('_')[2].delete_suffix('.md') }
+  end
+
   def due
     cards.select do |file_name|
       date = file_name.split('_')[0]
       Date.parse(date) <= Date.today
     end
   end
+
 end
 
 def highlight_text(text)
@@ -189,16 +194,14 @@ end
 def create_card(deck)
   card_name = nil
 
-  card_names = deck.cards.map { |card| card.split('_')[2].delete_suffix('.md') }
-
   loop do
-    card_name = create_card_name(card_names)
+    card_name = create_card_name(deck.card_names)
     break if card_name == ESCAPE
 
     if card_name.chars.any?(/[^a-zA-Z0-9]/)
       puts 'Sorry, only letters and numbers allowed in the card name.'
       gets.chomp
-    elsif card_names.include?(card_name)
+    elsif deck.card_names.include?(card_name)
       puts 'There is already a card with that name, please pick a different name'
       gets.chomp
     else
